@@ -20,6 +20,7 @@ import { default_ip_address } from "../../constant/constant";
     const route = useRoute();
   //   console.log(route.params);
     const navigation = useNavigation();
+    console.warn("api_call is:",route.params.api_call)
     const {
       completed,
       setCompleted,
@@ -87,7 +88,8 @@ import { default_ip_address } from "../../constant/constant";
         onPress={() =>  {
           navigation.navigate("FitScreen",{
             exercises:route.params.exercises,
-            intensity:route.params.intensity?route.params.intensity:null
+            intensity:route.params.intensity?route.params.intensity:null,
+            api_call:route.params.api_call,
         })
         setCompleted([]);
         }}

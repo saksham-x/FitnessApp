@@ -48,19 +48,26 @@ const WorkoutPlan = () => {
   }, [])
 
   const handleDayPress = async (week, day) => {
-    console.warn(day)
+    console.warn("day is",day)
+    console.warn("week is", week)
     let days = (week - 1) * 7 + day
-    if (completedDays <= days) {
+    if (completedDays >= days) {
+      console.warn(completedDays)
       let result = await fetch(`${default_ip_address}/get_all_workouts?id=${userid}&day=${days}`, {
         method: "get"
       })
       result = await result.json()
       if (result.success === true) {
         console.log(result.workouts)
+        let api_call=false
+        if(completedDays===days){
+          api_call=true
+        }
         navigation.navigate("WorkOutScreen", {
           image:"https://cdn-images.cure.fit/www-curefit-com/image/upload/c_fill,w_842,ar_1.2,q_auto:eco,dpr_2,f_auto,fl_progressive/image/test/sku-card-widget/gold2.png",
           exercises: result.workouts[days-1].workout,
-          intensity:result.workouts[days-1].intensity
+          intensity:result.workouts[days-1].intensity,
+          api_call:api_call
         })
       }
       else {

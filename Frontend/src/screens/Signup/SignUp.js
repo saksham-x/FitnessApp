@@ -6,6 +6,7 @@ import {
     ScrollView,
     ImageBackground,
     TextInputComponent,
+    Alert
   } from 'react-native';
 import React, {useState} from 'react';
 import CustomButton from '../../components/CustomButtons/CustomButton';
@@ -30,7 +31,7 @@ import { default_ip_address } from '../../constant/constant';
         password.length <= 5 ||
         !rgexp.test(email) ||
         age === '' ||
-        age <= 13 ||
+        age <= 17 ||
         age >= 70 ||
         phnumber.length <= 9
       ) {
@@ -44,7 +45,7 @@ import { default_ip_address } from '../../constant/constant';
         });
         result = await result.json();
         if (result.success === false) {
-          console.warn(result.error)
+          Alert.alert('Signup Error',result.error)
         } else if (result.success===true) {
           setUser(result.result._id)
           navigation.navigate('OTPConfirmation',{userid:result.result._id});
@@ -124,7 +125,7 @@ import { default_ip_address } from '../../constant/constant';
             )}
             {errors && age <= 13 && age != '' ? (
               <Text style={{color: 'red', left: -90}}>
-                *Age must be greater than 13
+                *Age must be greater than 17
               </Text>
             ) : (
               ''

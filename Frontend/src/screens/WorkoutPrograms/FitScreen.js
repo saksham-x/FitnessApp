@@ -12,37 +12,28 @@ import { FitnessItems } from "../../components/Context/Context";
 import { default_ip_address } from "../../constant/constant";
 // import {  } from 'react-use';
 import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const FitScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const startTime=new Date()
   const [showDone, setShowDone] = useState(false)
   const [timer, setTimer] = useState()
   const [index, setIndex] = useState(0);
   const exercises = route.params.exercises;
   const intensity = route.params.intensity;
   const api_call = route.params.api_call;
-
-  console.log('from fitsccree', exercises)
+const[userId,setUserId]=useState()
   const current = exercises[index];
   const timerRef = useRef()
   useFocusEffect(
     React.useCallback(() => {
-      console.warn(index)
-      console.warn(index)
-      console.warn(index)
-      console.warn(index)
-      console.warn(index)
-      console.warn(index)
-      console.warn(index)
-
       if (current.reps) {
-        console.warn("reps are there")
         setShowDone(true)
         setTimer()
       }
       else if (current.time) {
-        console.warn("time are there")
         setShowDone(false)
         setTimer(current.time)
       }
@@ -67,44 +58,42 @@ return()=>{}
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
-    timerRef.current = setTimeout(() => {
-      console.warn(timer)
+    timerRef.current = setTimeout(async() => {
       if (timer && timer >= 0) {
         setTimer(prevTimer => prevTimer - 1)
         startCountdown()
       }
       else {
-        console.warn(timer)
         if (timer <= 0 && index + 1 >= exercises.length) {
           if (intensity !== null) {
             if (api_call !== null) {
               if (api_call === true) {
-                console.warn("api_call true workouthome navigation")
                 navigation.navigate("WorkoutFeedback", {
                   intensity: intensity
                 });
               }
               else if (api_call === false) {
-                console.warn("api_call false workouthome navigation")
-
                 navigation.navigate("WorkoutHome");
               }
             }
           }
           else {
-            console.warn("api_call no workouthome navigation")
-
             navigation.navigate("WorkoutHome");
           }
         }
         else if (timer <= 0 && index + 1 < exercises.length) {
-          console.warn(" workouthome navigation")
-
+          console.log(current.time)
+          let data = await fetch(`${default_ip_address}/updateTodaysCalorieAndTime?id=${userId}`, {
+            method: "post",
+            body: JSON.stringify({ calorie: 6.3, time: (current.time / 60) }),
+            headers: { "Content-Type": "application/json" },
+          })
+          data=await data.json()
           navigation.navigate("RestScreen");
           setCompleted([...completed, current.name]);
           setWorkout(workout + 1);
-          setMinutes(minutes + 2.5);
-          setCalories(calories + 6.3);
+          setMinutes(minutes + (current.time/60));
+          setCalories(calories + current.calorie);
           setTimeout(() => {
             setIndex(index + 1);
           }, 1000);
@@ -116,7 +105,14 @@ return()=>{}
     startCountdown();
     return () => clearTimeout(timerRef.current)
   }, [timer]);
-
+useEffect(()=>{
+  const getUserData = async () => {
+    let userData = await AsyncStorage.getItem('user')
+    userData = await JSON.parse(userData)
+    setUserId(userData._id)
+  }
+  getUserData()
+},[])
   const {
     completed,
     setCompleted,
@@ -127,7 +123,6 @@ return()=>{}
     setWorkout,
     workout,
   } = useContext(FitnessItems);
-  console.log(completed, "completed exercises");
   return (
     <SafeAreaView>
       <Image
@@ -213,12 +208,19 @@ return()=>{}
         </Pressable>
       ) : showDone === true && index + 1 < exercises.length ? (
         <Pressable
-          onPress={() => {
+          onPress={async() => {
+            const finishTime=new Date()
+            const workout_interval = (finishTime - startTime)/1000
+            let data = await fetch(`${default_ip_address}/updateTodaysCalorieAndTime?id=${userId}`,{
+              method:"post",
+              body: JSON.stringify({ calorie :6.3,time:(workout_interval/60)}),
+              headers: { "Content-Type": "application/json" },
+            })
             navigation.navigate("RestScreen");
             setCompleted([...completed, current.name]);
             setWorkout(workout + 1);
-            setMinutes(minutes + 2.5);
-            setCalories(calories + 6.3);
+            setMinutes(minutes + (workout_interval/60));
+              setCalories(calories + (current.calorie*current.reps));
             setTimeout(() => {
               setIndex(index + 1);
             }, 2000);

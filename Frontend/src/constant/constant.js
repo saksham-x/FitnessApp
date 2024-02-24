@@ -1,1 +1,1 @@
-export const default_ip_address = 'http://192.168.1.128:4000'
+export const default_ip_address = 'http://6.6.7.116:4000'

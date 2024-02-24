@@ -1,18 +1,18 @@
-import { StyleSheet, Text, View, SafeAreaView, Image,ScrollView, ImageBackground, TouchableOpacity } from "react-native";
-import React ,{useContext} from "react";
+import { StyleSheet, Text, View, SafeAreaView, Image, ScrollView, ImageBackground, TouchableOpacity } from "react-native";
+import React, { useContext, useEffect } from "react";
 import FitnessCards from "../../components/Card/FitnessCards";
 import { FitnessItems } from "../../components/Context/Context";
 import { useNavigation } from "@react-navigation/native";
-
+import { default_ip_address } from '../../constant/constant';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WorkoutHome = () => {
   const navigation = useNavigation()
   const {
-   
     minutes,
-  
+    setMinutes,
     calories,
-
+    setCalories,
     workout,
   } = useContext(FitnessItems);
 
@@ -20,15 +20,35 @@ const WorkoutHome = () => {
     navigation.navigate('WorkoutPlan')
   }
 
+  useEffect(() => {
+    const checktodaysprogress = async () => {
+      let userData = await AsyncStorage.getItem('user')
+      userData = await JSON.parse(userData)
+      let data = await fetch(`${default_ip_address}/getTodaysCalorieAndTime?id=${userData._id}`, { method: 'get' })
+      data = await data.json();
+      if (data.success === true) {
+        const min = data.result[0].workout_interval
+        const cal = data.result[0].calorieBurnt
+        setMinutes(min.toFixed(2))
+        setCalories(cal.toFixed(2))
+      }
+      else{
+        setMinutes(0)
+        setCalories(0)
+      }
+    }
+    checktodaysprogress()
+  }, [])
+
   return (
-    <ScrollView style={{marginTop:40}}>
+    <ScrollView style={{ marginTop: 40 }}>
       <View
         style={{
           backgroundColor: "#CD853F",
           padding: 10,
           height: 200,
           width: "100%",
-          marginBottom:50
+          marginBottom: 50
         }}
       >
         <Text style={{ color: "white", fontWeight: "bold", fontSize: 18, textAlign: 'center' }}>
@@ -43,7 +63,7 @@ const WorkoutHome = () => {
             marginTop: 20,
           }}
         >
-          <View>
+          {/* <View>
             <Text
               style={{
                 textAlign: "center",
@@ -57,9 +77,11 @@ const WorkoutHome = () => {
             <Text style={{ color: "#D0D0D0", fontSize: 17, marginTop: 6 }}>
               WORKOUTS
             </Text>
-          </View>
+          </View> */}
 
-          <View>
+          <View style={{
+            paddingLeft: 40,
+          }}>
             <Text
               style={{
                 textAlign: "center",
@@ -75,7 +97,9 @@ const WorkoutHome = () => {
             </Text>
           </View>
 
-          <View>
+          <View style={{
+            paddingRight: 40,
+          }}>
             <Text
               style={{
                 textAlign: "center",
@@ -92,7 +116,7 @@ const WorkoutHome = () => {
           </View>
         </View>
 
-        <View style={{justifyContent: "center", alignItems: "center", marginHorizontal: 10 , borderRadius: 5, overflow: 'hidden'}}>
+        <View style={{ justifyContent: "center", alignItems: "center", marginHorizontal: 10, borderRadius: 5, overflow: 'hidden'}}>
           <TouchableOpacity onPress={handle30daysworkout}>
             <ImageBackground
               style={{
@@ -105,12 +129,12 @@ const WorkoutHome = () => {
                 uri: "https://cdn-images.cure.fit/www-curefit-com/image/upload/c_fill,w_842,ar_1.2,q_auto:eco,dpr_2,f_auto,fl_progressive/image/test/sku-card-widget/gold2.png",
               }}
             >
-              <Text style={{color: 'white', fontSize: 36, textAlign: 'center', fontWeight: 'bold', paddingHorizontal: 10}}>30 Days Workout Plan</Text>
+              <Text style={{ color: 'white', fontSize: 36, textAlign: 'center', fontWeight: 'bold', paddingHorizontal: 10 }}>28 Days Workout Plan</Text>
             </ImageBackground>
           </TouchableOpacity>
         </View>
       </View>
-      <FitnessCards/>
+      <FitnessCards />
     </ScrollView>
   );
 };

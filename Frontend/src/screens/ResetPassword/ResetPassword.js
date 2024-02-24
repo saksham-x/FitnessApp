@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput, StyleSheet,Alert } from 'react-native';
 import CustomButton from '../../components/CustomButtons/CustomButton';
 import CustomizedInput from '../../components/CustomizedInput/CustomizedInput';
 import { useNavigation,useRoute } from '@react-navigation/native';
@@ -31,7 +31,7 @@ const ResetPassword = () => {
          navigation.navigate('LoginScreen')
       }
       else if(result.success===false){
-        console.warn(result.error)
+        Alert.alert('Password Reset Error',result.error)
       }
     }
   };

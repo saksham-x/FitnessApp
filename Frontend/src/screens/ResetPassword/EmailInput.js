@@ -1,6 +1,6 @@
 // EmailInput.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput, StyleSheet,Alert } from 'react-native';
 import CustomButton from '../../components/CustomButtons/CustomButton';
 import CustomizedInput from '../../components/CustomizedInput/CustomizedInput';
 import { useNavigation } from '@react-navigation/native';
@@ -23,7 +23,7 @@ const EmailInput = ({ }) => {
     navigation.navigate('OTPConfirmation2',{userid:result.result._id})
     }
     else if(result.success===false){
-      console.warn(result.error)
+      Alert.alert('OTP Error',result.error)
     }
   };
 

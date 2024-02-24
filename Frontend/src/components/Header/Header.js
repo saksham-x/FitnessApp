@@ -28,9 +28,9 @@ const Header = ({ name }) => {
             <Text style={styles.heading}>Welcome, {name}</Text>
             <Text style={styles.subHeading}>{currentDate}</Text>
         </View>
-        <View>
+        {/* <View>
             <Feather name='bell' size={24} color='#b3b3b3' onPress={() => navigation.navigate('Chatbot')} />
-        </View>
+        </View> */}
     </View>
   )
 }

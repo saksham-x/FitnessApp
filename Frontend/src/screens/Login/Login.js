@@ -1,4 +1,4 @@
-import { View, Text, TextInput, StyleSheet, ScrollView, ImageBackground } from 'react-native'
+import { View, Text, TextInput, StyleSheet, ScrollView, ImageBackground,Alert } from 'react-native'
 import React, { useState,useEffect } from 'react'
 
 import CustomButton from '../../components/CustomButtons/CustomButton'
@@ -65,7 +65,7 @@ const onLogInPressed = async() => {
         navigation.navigate('InputParameters')
     }
     else if(result.success===false){
-        console.warn(result.error)
+      Alert.alert('Login Error',result.error)
     }
   }
 }

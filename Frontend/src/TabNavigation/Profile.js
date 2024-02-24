@@ -17,14 +17,23 @@ let height = Dimensions.get('window').height; //full height
 
 const Profile = () => {
   const navigation = useNavigation()
-
+const [name,setName]=useState('')
   const [enableDarkTheme, setEnableDarkTheme] = useState(true)
+  useEffect(()=>{
+async function getId(){
+let data=await AsyncStorage.getItem('user')
+data=await JSON.parse(data)
+  setName(data.name)
+}
+getId()
+  },[])
 
   const handleLogout = async () => {
-    AsyncStorage.removeItem('user')
-    let data = await AsyncStorage.getItem('user')
-    let parsedData = JSON.parse(data)
-    console.log('from here',parsedData)
+   await AsyncStorage.removeItem('user')
+   await AsyncStorage.removeItem('userInputs')
+    // let data = await AsyncStorage.getItem('user')
+    // let parsedData = JSON.parse(data)
+    // console.log('from here',parsedData)
     navigation.navigate('LoginScreen')
   }
 
@@ -34,7 +43,7 @@ const Profile = () => {
       <View style={styles.imageContainer}>
         <Image source={profile} style={styles.image} />
       </View>
-      <Text style={styles.textName}>Rame Charles</Text>
+      <Text style={styles.textName}>{name}</Text>
       </View>
       <View style={styles.lowerView}>
         <Pressable
@@ -50,7 +59,7 @@ const Profile = () => {
             <Ionicons name='person-outline' size={size} color={color}  />
             <Text style={styles.menuText}>Edit Profile</Text>
         </Pressable>
-        <Pressable
+        {/* <Pressable
           onPress={() => console.warn('Pressed')}
           style={({ pressed }) => [
             {
@@ -62,7 +71,7 @@ const Profile = () => {
         >
             <Feather name='bell' size={size} color={color}  />
             <Text  style={styles.menuText}>Notifications</Text>
-        </Pressable>
+        </Pressable> */}
         <Pressable
                   onPress={handleLogout}
                   style={({ pressed }) => [

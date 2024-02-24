@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import CustomDropdown from '../../components/CustomDropdown/CustomDropdown'
 import CustomizedInput from '../../components/CustomizedInput/CustomizedInput'
 import CustomButton from '../../components/CustomButtons/CustomButton'
+import AddItem from '../../components/addItem/AddItem'
 import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { default_ip_address } from '../../constant/constant'
@@ -35,6 +36,30 @@ const fitnessLevelItems = [
   { label: 'Advanced', value: 'Advanced' },
 ];
 
+const healthLabelsItems = [
+  // {label: 'Select Health Labels', value: '' },
+  { label: 'Alcohol-Cocktail', value: 'Alcohol-Cocktail' },
+  { label: 'Alcohol-Free', value: 'Alcohol-Free' },
+  { label: 'Celery-Free', value: 'Celery-Free' },
+  { label: 'Crustcean-Free', value: 'Crustacean-Free' },
+  { label: 'Dairy-Free', value: 'Dairy-Free' },
+  { label: 'Egg-Free', value: 'Egg-Free' },
+  { label: 'Fish-Free', value: 'Fish-Free' },
+  { label: 'Gluten-Free', value: 'Gluten-Free' },
+  { label: 'Keto-Friendly', value: 'Keto-Friendly' },
+  { label: 'Low Sugar', value: 'Low-Sugar' },
+  { label: 'Lupine-Free', value: 'Lupine-Free' },
+  { label: 'Mustard-Free', value: 'Mustard-Free' },
+  { label: 'Peanut-Free', value: 'Peanut-Free' },
+  { label: 'Pork-Free', value: 'Pork-Free' },
+  { label: 'Red-Meat-Free', value: 'Red-Meat-Free' },
+  { label: 'Sesame-Free', value: 'Sesame-Free' },
+  { label: 'Soy-Free', value: 'Soy-Free' },
+  { label: 'Sugar-Conscious', value: 'Sugar-Conscious' },
+  { label: 'Vegan', value: 'Vegan' },
+  { label: 'Vegetarian', value: 'Vegetarian' },
+  { label: 'Wheat-Free', value: 'Wheat-free' },
+]
 const InputParameters = () => {
 
   const navigation = useNavigation()
@@ -52,11 +77,11 @@ const InputParameters = () => {
   const [loading, setLoading] = useState(false)
   const [activityLevel, setActivityLevel] = useState('');
   const [calculatedCalorie, setCalculatedCalorie] = useState(null);
-
+  const [selectedHealthLabel, setSelectedHealthLabel] = useState([])
 
   const getMyObject = async () => {
     try {
-      return await AsyncStorage.getItem('userInputs')
+      return await AsyncStorage.getItem('user')
     } catch (error) {
       throw new Error(error)
     }
@@ -64,28 +89,28 @@ const InputParameters = () => {
   useEffect(() => {
     const checkAndNavigate = async () => {
       try {
-        const data = await getMyObject();
-        if (data) {
-          const parsedData = JSON.parse(data);
-          console.log("from here", parsedData);
-
+        const userdetails = await getMyObject();
+        const parsedData = JSON.parse(userdetails);
+        console.log("parsed data", parsedData)
+        let data = await fetch(`${default_ip_address}/getInformation?id=${parsedData._id}`,
+          { method: 'post' })
+          data = await data.json()
+          if (data.success === true) {
+            console.log(data)
+          await AsyncStorage.setItem('userInputs', JSON.stringify(data.data));
           // Check if the parsed data has the expected structure or properties
-          if (parsedData) {
-            // navigation.navigate('WorkoutPrograms');
-            navigation.navigate('HomeScreen')
-          }
+          // navigation.navigate('WorkoutPrograms');
+          navigation.navigate('HomeScreen')
         }
       } catch (error) {
         console.error('Error parsing data or navigating:', error);
       }
     };
-
     checkAndNavigate();
   }, [])
 
   useEffect(() => {
     calculateBmi()
-    console.warn(bmi)
   }, [height, weight])
 
   useEffect(() => {
@@ -133,6 +158,20 @@ const InputParameters = () => {
       setBmi(calculated_bmi.toFixed(2));
     }
   }
+  const handleRemove = (type, value) => {
+    if (type === 'healthLabel') {
+      setSelectedHealthLabel((prevLabels) => prevLabels.filter((label) => label.value !== value));
+    } 
+  };
+
+  const handleHealthLabel = (value) => {
+    if(!selectedHealthLabel.some((item) => item.value === value)) {
+      setSelectedHealthLabel([
+          ...selectedHealthLabel,
+          { label: healthLabelsItems.find(item => item.value === value).label , value: value}
+      ])
+    }
+  }
 
   const calculateBmiClass = () => {
     if (bmi) {
@@ -149,10 +188,9 @@ const InputParameters = () => {
   }
 
   const handleUserInput = async (e) => {
-    console.warn('pressed submit')
     console.log(gender, age, height, weight, bmi, bmiClass, goals, injury, fitnessLevel)
     try {
-      if (gender === undefined || age === '' || height === '' || weight === '' || goals === '' || injury === undefined || fitnessLevel === '' || activityLevel === '') {
+      if (gender === undefined || age === '' || height === '' || weight === '' || goals === '' || injury === undefined || fitnessLevel === '' || activityLevel === '' || !weight || weight < 20 || weight > 200 || !age || age < 18 || age > 70 || !height || height < 0.6 || height > 2.7) {
         console.log(gender, age, height, weight, bmi, bmiClass, goals, injury, fitnessLevel)
         setError(true)
         console.log(error)
@@ -188,7 +226,9 @@ const InputParameters = () => {
           "Bmi_class": bmiClass,
           "Goals": goals,
           "Injury": injury,
-          "Current_fitness_level": fitnessLevel
+          "Current_fitness_level": fitnessLevel,
+          "Calories": calculatedCalorie,
+          'healthLabels': selectedHealthLabel
         }
         let result = await fetch(`${default_ip_address}/userInput`, {
           method: "post",
@@ -203,20 +243,17 @@ const InputParameters = () => {
           setLoading(false)
           // await AsyncStorage.setItem('isData', 'abc')
           // navigation.navigate('WorkoutPrograms', {result})
-          console.warn(userObject)
-          userObject=Object.assign({},userObject,{ "calories": calculatedCalorie })
-          console.warn(calculatedCalorie)
+          // userObject=Object.assign({},userObject,{ "calories": calculatedCalorie })
+          // console.warn(calculatedCalorie)
           await AsyncStorage.setItem('userInputs', JSON.stringify({ userObject }))
 
           let user_data = await AsyncStorage.getItem('user')
           let parsed_data = JSON.parse(user_data)
           let user_id = parsed_data._id
-          console.warn(user_id)
-          console.warn(result.Intensity)
           let data_result = await fetch(`${default_ip_address}/generate_workout?id=${user_id}&intensity=${result.Intensity}`, {
             method: 'post',
             body: JSON.stringify({
-              age, height, weight, injury, gender, bmi, bmi_class: bmiClass, goal: goals, level: fitnessLevel
+              age, height, weight, injury, gender, bmi, bmi_class: bmiClass, goal: goals, level: fitnessLevel, calories: calories, healthLabels:selectedHealthLabel
             }),
             headers: {
               "Content-Type": "application/json"
@@ -224,11 +261,6 @@ const InputParameters = () => {
           })
           data_result = await data_result.json()
           if (data_result.success === true) {
-            console.log("till here")
-            console.log("till here")
-            console.log("till here")
-            console.log("till here")
-            console.log("till here")
 
             navigation.navigate('HomeScreen', { result })
 
@@ -249,7 +281,6 @@ const InputParameters = () => {
         }
       }
     } catch (error) {
-      console.warn('Error: ', error)
       setLoading(false)
     }
   }
@@ -276,9 +307,9 @@ const InputParameters = () => {
               />
             </View>
             <View style={styles.halfWidthInput}>
-              {error && !age ? (
+              {error && (!age || age < 18 || age > 80) ? (
                 <Text style={{ color: 'red' }}>
-                  *Enter age
+                  *Enter age between 18 and 70
                 </Text>
               ) : (
                 ''
@@ -294,9 +325,9 @@ const InputParameters = () => {
 
           <View style={styles.halfWidthRow}>
             <View style={styles.halfWidthInput}>
-              {error && !height ? (
+              {error && (!height || height < 0.6 || height > 2.7) ? (
                 <Text style={{ color: 'red' }}>
-                  *Enter height
+                  *Enter valid height
                 </Text>
               ) : (
                 ''
@@ -309,9 +340,9 @@ const InputParameters = () => {
               />
             </View>
             <View style={styles.halfWidthInput}>
-              {error && !weight ? (
+              {error && (!weight || weight < 20 || weight > 200) ? (
                 <Text style={{ color: 'red' }}>
-                  *Enter weight
+                  *Enter valid weight
                 </Text>
               ) : (
                 ''
@@ -407,6 +438,21 @@ const InputParameters = () => {
               />
             </View>
           </View>
+          <AddItem name="Health Label" type={selectedHealthLabel || []} onRemove={(value) => handleRemove('healthLabel', value)} />
+          {error && selectedHealthLabel.length === 0 ? (
+            <Text style={{ color: 'red', left: -122 }}>
+              *Select health level
+            </Text>
+          ) : (
+            ''
+          )}
+          <CustomDropdown
+            label="Health Label"
+            items={healthLabelsItems}
+            placeholder="Select health labels"
+            onValueChange={handleHealthLabel}
+            style={styles.fullWidthInput}
+          />
           <CustomButton text="Submit" type="PRIMARY" onPress={handleUserInput} />
         </>)}
     </View>

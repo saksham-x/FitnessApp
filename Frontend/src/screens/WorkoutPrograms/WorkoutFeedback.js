@@ -25,7 +25,6 @@ const WorkoutFeedback = () => {
         let user_data = await AsyncStorage.getItem('user')
         let parsed_data = JSON.parse(user_data)
         let user_id = parsed_data._id
-        console.warn("setted intensity is",intensity)
         let data_result = await fetch(`${default_ip_address}/generate_workout?id=${user_id}&intensity=${intensity}`, {
             method: 'post',
             headers: {

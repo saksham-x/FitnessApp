@@ -30,6 +30,7 @@ import DummyComponent from '../screens/Dummy'
 import CongratulationScreen from '../components/Congratulations/CongratulationScreen'
 import RecipesCard from '../screens/DietPlans/RecipesCard'
 import WorkoutFeedback from '../screens/WorkoutPrograms/WorkoutFeedback'
+import ScanDevices from '../bluetooth_scan/ScanDevices'
 
 const Stack = createNativeStackNavigator()
 
@@ -51,6 +52,8 @@ const StackNavigator = () => {
         <Stack.Screen name='ProgressTracking' component={ProgressTracking} />
         <Stack.Screen name='SmartwatchConnected' component={ConnectedSmartWatchScreen} />
         <Stack.Screen name='SmartWatchDetails' component={SmartWatchDetails} />
+        <Stack.Screen name='ScanDevices' component={ScanDevices} />
+
         {/* <Stack.Screen name='SearchingForDevices' component={SearchingForDevices} /> */}
 
         <Stack.Screen name='StaticWorkout'  component={StaticWorkout} />

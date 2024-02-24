@@ -32,6 +32,7 @@ useEffect(() => {
     if(parseData)  {
       // console.log('local:',parseData)
       setName(parseData.name)
+      
     }
   }
   getData()

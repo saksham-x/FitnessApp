@@ -25,17 +25,14 @@ const WorkoutPlan = () => {
       console.log("user", parsedData._id)
       setUserID(parsedData._id)
     }
-    console.warn("userid here", parsedData._id)
 
     let result = await fetch(`${default_ip_address}/get_completed_workout_days?id=${parsedData._id}`, {
       method: "get",
       headers:{"Content-Type":"application/json"},
     })
     result = await result.json()
-    console.warn(result)
     if (result.success === true) {
       setCompletedDays(result.workout_length)
-      console.warn(result.workout_length)
     }
     else {
       console.log(result.message)
@@ -45,14 +42,14 @@ const WorkoutPlan = () => {
 
   useEffect(() => {
     getCompletedWorkoutLength()
+    setDayCountdown(28-(completedDays-1))
+    setProgressPercentage((completedDays - 1) *100/28)
   }, [])
 
   const handleDayPress = async (week, day) => {
-    console.warn("day is",day)
-    console.warn("week is", week)
+    
     let days = (week - 1) * 7 + day
     if (completedDays >= days) {
-      console.warn(completedDays)
       let result = await fetch(`${default_ip_address}/get_all_workouts?id=${userid}&day=${days}`, {
         method: "get"
       })
@@ -71,47 +68,50 @@ const WorkoutPlan = () => {
         })
       }
       else {
-        console.warn(result.message)
       }
     }
-    if (!(week == currentWeek && day == currentDay)) {
+    else{
       Alert.alert('Incomplete Workout', 'Complete previous days\' workout first.');
     }
-    if (week <= currentWeek && day <= currentDay) {
-      console.warn('navigate to workout')
+    // if (!(week == currentWeek && day == currentDay)) {
+    //   Alert.alert('Incomplete Workout', 'Complete previous days\' workout first.');
 
-      setTodayWorkoutCompleted(true)
-      isTodaysWorkoutCompleted()
+    // }
+    // if (week <= currentWeek && day <= currentDay) {
+    //   console.warn('navigate to workout')
 
-      if (currentDay < 7) {
-        setDayCountdown(dayCountdown - 1)
-        setCurrentDay(currentDay + 1)
-      } else {
-        if (currentWeek < 4) {
-          if (currentDay === 7 && todaysWorkoutCompleted) {
-            console.log('completed')
-            setDayCountdown(dayCountdown - 1)
-            setThisWeekCompleted(true)
-          }
-          setCurrentDay(1)
-          setCurrentWeek(currentWeek + 1)
-        } else {
-          console.log('all')
-          setDayCountdown(dayCountdown - 1)
-          setThisWeekCompleted(true)
-          areAllTrophiesGold()
-        }
-      }
-    }
+    //   setTodayWorkoutCompleted(true)
+    //   isTodaysWorkoutCompleted()
+
+    //   if (currentDay < 7) {
+    //     setDayCountdown(dayCountdown - 1)
+    //     setCurrentDay(currentDay + 1)
+    //   } else {
+    //     if (currentWeek < 4) {
+    //       if (currentDay === 7 && todaysWorkoutCompleted) {
+    //         console.log('completed')
+    //         setDayCountdown(dayCountdown - 1)
+    //         setThisWeekCompleted(true)
+    //       }
+    //       setCurrentDay(1)
+    //       setCurrentWeek(currentWeek + 1)
+    //     } else {
+    //       console.log('all')
+    //       setDayCountdown(dayCountdown - 1)
+    //       setThisWeekCompleted(true)
+    //       areAllTrophiesGold()
+    //     }
+    //   }
+    // }
   };
 
-  const isTodaysWorkoutCompleted = () => {
-    if (todaysWorkoutCompleted && !(progressPercentage >= 100)) {
-      console.log('inside')
-      const newPercentage = progressPercentage + (100 / 27)
-      setProgressPercentage(newPercentage)
-    }
-  }
+  // const isTodaysWorkoutCompleted = () => {
+  //   if (todaysWorkoutCompleted && !(progressPercentage >= 100)) {
+  //     console.log('inside')
+  //     const newPercentage = progressPercentage + (100 / 27)
+  //     setProgressPercentage(newPercentage)
+  //   }
+  // }
 
   const areAllTrophiesGold = () => {
     if (thisWeekCompleted && currentWeek === 4) {
@@ -122,9 +122,9 @@ const WorkoutPlan = () => {
   const renderDays = (week) => {
     const days = [];
     for (let day = 1; day <= 7; day++) {
-      const isCurrentDay = week === currentWeek && day === currentDay;
+      const isCurrentDay = completedDays >= ((week - 1) * 7 + day)
       const dayStyle = isCurrentDay ? styles.currentDay : null;
-      const dayCompletedStyle = (week < currentWeek || (week === currentWeek && day < currentDay)) ? styles.currentDayCompleted : null
+      const dayCompletedStyle = completedDays > ((week - 1) * 7 + day) ? styles.currentDayCompleted : null
       // console.log('day',day)
       days.push(
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -138,7 +138,7 @@ const WorkoutPlan = () => {
             <Text style={styles.dayText}>{day}</Text>
           </TouchableOpacity>
           <Entypo name='chevron-right' size={20} color={'white'} style={{ paddingHorizontal: 5 }} />
-          {day === 7 && <MaterialCommunityIcons name='trophy' size={40} color={(week < currentWeek) && thisWeekCompleted ? '#e1c564' : '#d3d3d3'} style={{ paddingHorizontal: 5 }} onPress={areAllTrophiesGold} />}
+          {day === 7 && <MaterialCommunityIcons name='trophy' size={40} color={(week < (completedDays/7)) ? '#e1c564' : '#d3d3d3'} style={{ paddingHorizontal: 5 }} onPress={areAllTrophiesGold} />}
         </View>
       );
     }
@@ -149,7 +149,7 @@ const WorkoutPlan = () => {
   const renderWeeks = () => {
     const weeks = [];
     for (let week = 1; week <= 4; week++) {
-      const weekStyle = week === currentWeek ? styles.currentWeek : null;
+      const weekStyle = week === (Math.floor(completedDays / 7)+1) ? styles.currentWeek : null;
       // console.log('week',week)
       weeks.push(
         <View key={week} style={[styles.weekContainer, weekStyle]}>

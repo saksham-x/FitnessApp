@@ -5,7 +5,6 @@ import { useNavigation } from '@react-navigation/native';
 const RecipeItem = ({ recipe }) => {
   const navigation = useNavigation()
   const handlePress = () => {
-    console.warn('pressed')
     navigation.navigate('NutritionFacts')
   }
   return (

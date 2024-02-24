@@ -9,17 +9,18 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const path = require('path')
-
+const sendverifymail = require('./mail/verifymail')
 const spawner = require('child_process').spawn
 
 const IntensityLevel = require('./db/intensity_input')
 
 const app = express()
 const port = 4000
-
+app.use(express.json())
 app.use(bodyParser.json())
 app.use(cors())
 app.use('/path/to/gifs', express.static(path.join(__dirname, 'path', 'to', 'gifs')));
+app.use('/path/to/exercise', express.static(path.join(__dirname, 'path', 'to', 'exercise')));
 
 const OTPgenerate = () => {
     const otp = otpGenerator.generate(4, {
@@ -50,13 +51,16 @@ app.post('/register', async (req, res) => {
         delete result.password
         res.status(200).json({ success: true, result: result })
         // sending OTP method
-        otpsend(result.phonenumber, result.otp)
+        const subject = "For Mail Verification "
+        // sending OTP method
+        sendverifymail(result.name, result.email, result.otp, subject)
+        // otpsend(result.phonenumber, result.otp)
     }
 })
 
 app.post('/login', async (req, res) => {
     if (req.body.email && req.body.password) {
-        let data = await user.findOne(req.body).select("-password")
+        let data = await user.findOne(req.body).select("-password -workout -diet")
         if (data && data.isUserVerified === false)
             return res.status(400)
                 .json({ success: false, error: "Please verify your phone number first!" })
@@ -70,7 +74,27 @@ app.post('/login', async (req, res) => {
     }
     else {
         res.status(400).json({ success: false, error: "Enter all informations" })
+    }
+})
 
+app.post('/getInformation', async (req, res) => {
+    if (req.query.id) {
+        let data = await user.findOne({ _id: req.query.id }).select("-workout.workout")
+        if (data) {
+            let datas = data.workout
+            if (datas.age && datas.height && datas.weight && datas.bmi && datas.bmi_class && datas.goal && datas.level && datas.calories) {
+                res.status(200).json({ success: true, data: datas })
+            }
+            else {
+                res.status(400).json({ success: false, error: "Details Not Found" })
+            }
+        }
+        else {
+            res.status(400).json({ success: false, error: "User not found" })
+        }
+    }
+    else {
+        res.status(400).json({ success: false, error: "Id needed" })
     }
 })
 
@@ -78,7 +102,6 @@ app.post('/login', async (req, res) => {
 app.post('/otpverify', async (req, res) => {
     let data = await user.findOne({ _id: req.query.id })
     if (data) {
-        console.log(data)
         if (req.body.otp === data.otp) {
             let result = await user.updateOne({ _id: req.query.id }, { $set: { isUserVerified: true, otp: '' } })
             res.status(200).json({ success: true, result: "Successfully verified" })
@@ -92,20 +115,25 @@ app.post('/otpverify', async (req, res) => {
 app.post('/resendotp', async (req, res) => {
     let updateinfo = await user.updateOne({ _id: req.query.id }, { $set: { otp: OTPgenerate() } })
     let data = await user.findOne({ _id: req.query.id })
-    console.log(updateinfo)
     // Sending OTP method
-    otpsend(data.phonenumber, data.otp)
+    const subject = "For Mail Verification "
+    // sending OTP method
+    sendverifymail(data.name, data.email, data.otp, subject)
+    // otpsend(data.phonenumber,data.otp)
     res.status(200).json({ success: true, result: "OTP sent" })
 
 })
 
 app.post('/forgetpassword', async (req, res) => {
-    if (req.body.phonenumber) {
+    if (req.body.email) {
         let data = await user.findOne(req.body)
         if (data) {
-            let result = await user.updateOne({ phonenumber: req.body.phonenumber }, { $set: { otp: OTPgenerate() } })
+            let result = await user.updateOne({ email: req.body.email }, { $set: { otp: OTPgenerate() } })
             let data2 = await user.findOne(req.body)
-            otpsend(data2.phonenumber, data2.otp)
+            const subject = "For Password Reset"
+            // sending OTP method
+            sendverifymail(data2.name, data2.email, data2.otp, subject)
+            // otpsend(data2.phonenumber, data2.otp)
             res.status(200).json({ success: true, result: data2 })
         }
         else {
@@ -138,7 +166,6 @@ app.post('/resetpassword', async (req, res) => {
 app.post('/userInput', async (req, res) => {
     let intensityInputs = new IntensityLevel(req.body)
     let result = await intensityInputs.save()
-    console.log(result)
 
     let responseSent = false
 
@@ -150,7 +177,6 @@ app.post('/userInput', async (req, res) => {
     python_process.stdout.on('data', async (data) => {
         try {
             const jsonData = JSON.parse(data.toString());
-            console.log('Data received from python:', jsonData);
 
             result.Intensity = jsonData.Intensity
 
@@ -179,7 +205,6 @@ app.post('/userInput', async (req, res) => {
 
 app.get('/workouts', async (req, res) => {
     let data = await workout.find()
-    console.log(data)
     if (data) {
         res.status(200).json({ success: true, result: data })
     }
@@ -213,7 +238,6 @@ app.post('/add_daily_diets', async (req, res) => {
 
 app.get('/get_todays_diet', async (req, res) => {
     let data = await user.findOne({ _id: req.query.id })
-    console.log('from here', data)
     if (data) {
         const diet = data.diet
         const filtered_diet = diet.filter((data) => {
@@ -223,7 +247,6 @@ app.get('/get_todays_diet', async (req, res) => {
             res.status(200).json({ success: true, result: filtered_diet })
         }
         else {
-            console.log("not found diet")
             res.json({ success: false, result: "Today's Diet Not Found" })
         }
     }
@@ -236,6 +259,7 @@ app.get('/get_todays_diet', async (req, res) => {
 app.post('/generate_workout', async (req, res) => {
     let data = await user.findOne({ _id: req.query.id })
     if (data) {
+        console.log(req.body.healthLabels)
         let intensity = req.query.intensity
         intensity = Number(intensity)
         let number_of_middle_workouts = 0
@@ -362,7 +386,9 @@ app.post('/generate_workout', async (req, res) => {
                         bmi: req.body.bmi,
                         bmi_class: req.body.bmi_class,
                         goal: req.body.goal,
-                        level: req.body.level
+                        level: req.body.level,
+                        calories: req.body.calories,
+                        healthLabel:req.body.healthLabels
                     }
                 }
             })
@@ -390,13 +416,11 @@ app.get('/get_all_workouts', async (req, res) => {
     let user_id = req.query.id
     // let day = parseInt(req.query.day, 10)
     let day = req.query.day
-    console.log(day, user_id)
     let data = await user.findOne(
         { _id: user_id, 'workout.workout': { $elemMatch: { day: day } } }
     );
     if (data) {
         let workouts = data.workout.workout
-        console.log(workouts)
         res.status(200).json({ success: true, workouts: workouts })
     }
     else {
@@ -405,19 +429,10 @@ app.get('/get_all_workouts', async (req, res) => {
 })
 
 app.get("/get_completed_workout_days", async (req, res) => {
-    console.log("called")
-    console.log("called")
-    console.log("called")
-    console.log("called")
-    console.log("called")
-    console.log("called")
-    console.log("called")
 
-    console.log(req.query.id)
     let data = await user.findOne({ _id: req.query.id })
     if (data) {
         let workouts = data.workout.workout
-        console.log(workouts)
         let workout_length = workouts.length
         res.status(200).json({ success: true, workout_length: workout_length })
     }
@@ -475,8 +490,79 @@ app.get('/edamam', async (req, res) => {
         }
     }
     catch (error) {
-        console.log(error)
         res.status(500).json({ success: false, result: 'Internal Server Error' })
+    }
+})
+
+app.get('/getTodaysCalorieAndTime', async (req, res) => {
+    console.log("called")
+    let data = await user.findOne({ _id: req.query.id })
+    if (data) {
+        const progress = data.progress
+        console.log(progress)
+        const filtered_progress = progress.filter((data) => {
+            return data.date === new Date().toDateString()
+        })
+        if (filtered_progress.length > 0) {
+            res.status(200).json({ success: true, result: filtered_progress })
+        }
+        else {
+            res.json({ success: false, result: "No any progress Today" })
+        }
+    }
+    else {
+        res.status(400).json({ success: false, result: "User Not Found" })
+    }
+})
+app.get('/getWeeklyCalorieAndTime', async (req, res) => {
+    console.log("called")
+    let data = await user.findOne({ _id: req.query.id })
+    if (data) {
+        const progress = data.progress
+        console.log(progress)
+        const filtered_progress = progress.filter((data) => {
+            const today = new Date()
+            const obtained_date = new Date(data.date)
+            console.log(obtained_date)
+            const interval = (today - obtained_date) / (1000 * 60 * 60 * 24 * 7)
+            console.log(interval)
+            return data.date && interval <= 7
+        })
+        if (filtered_progress.length > 0) {
+            res.status(200).json({ success: true, result: filtered_progress })
+        }
+        else {
+            res.json({ success: false, result: "No any progress this week" })
+        }
+    }
+    else {
+        res.status(400).json({ success: false, result: "User Not Found" })
+    }
+})
+
+app.post('/updateTodaysCalorieAndTime', async (req, res) => {
+    console.log(req.query.id)
+    let data = await user.findOne({ _id: req.query.id })
+    console.log(data)
+    console.log(req.body)
+    if (data) {
+        if (req.body.calorie && req.body.time) {
+            let getProgress = await user.findOne({ _id: req.query.id, 'progress.date': new Date().toDateString() })
+            if (getProgress) {
+                let result = await user.updateOne({ _id: req.query.id, 'progress.date': new Date().toDateString() }, { $inc: { "progress.$.calorieBurnt": req.body.calorie, "progress.$.workout_interval": req.body.time } })
+                res.status(200).json({ success: true, result: "Successfully updated" })
+            }
+            else {
+                let result = await user.updateOne({ _id: req.query.id }, { $push: { progress: { date: new Date().toDateString(), calorieBurnt: req.body.calorie, workout_interval: req.body.time, } } })
+                res.status(200).json({ success: true, result: "Successfully pushed" })
+            }
+        }
+        else {
+            res.status(400).json({ success: false, result: "Provide calorie burnt and time interval" })
+        }
+    }
+    else {
+        res.status(400).json({ success: false, result: "User Not Found" })
     }
 })
 

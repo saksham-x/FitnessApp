@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity,Alert } from 'react-native';
 import CustomButton from '../../components/CustomButtons/CustomButton';
 import CustomizedInput from '../../components/CustomizedInput/CustomizedInput';
 import { useNavigation,useRoute } from '@react-navigation/native';
@@ -11,7 +11,6 @@ const OTPConfirmation2 = () => {
   const navigation = useNavigation()
   const route=useRoute()
   const userid=route.params?.userid;
-  // console.warn(userid)
   const onResendOTP = async() => {
     let result = await fetch(`${default_ip_address}/resendotp?id=${userid}`, {
       method: "post"});
@@ -32,7 +31,7 @@ const OTPConfirmation2 = () => {
          navigation.navigate('ResetPassword',{userid:userid})
       }
       else if(result.success===false){
-        console.warn("Wrong OTP")
+        Alert.alert("OTP Error", "Wrong OTP")
         setError(true)
       }
   };

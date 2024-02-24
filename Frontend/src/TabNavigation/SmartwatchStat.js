@@ -1,16 +1,53 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, Pressable } from 'react-native'
+import { View, Text, StyleSheet, Image, TouchableOpacity, Pressable, Platform, PermissionsAndroid } from 'react-native'
 import React, { useEffect } from 'react'
 import smartwatch from '../../assets/smartwatch.png'
 import { useNavigation } from '@react-navigation/native'
+// import Permissions from '../components/ReactNativeBlePlx/Permissions'
+import BleManager from 'react-native-ble-manager';
 
 const SmartwatchStat = () => {
-
+// const permission=Permissions().then((result)=>{
+// console.log(result,"here")
+// })
   const navigation = useNavigation()
+// console.log(permission)
+  useEffect(() => {
+    // Permissions()
+    console.log("running effects")
+  }, [])
 
   const handleConnect = () => {
-    navigation.navigate('SmartWatchDetails')
+    navigation.navigate('ScanDevices')
   }
+  // useEffect(() => {
+  //   console.warn("running effects")
 
+  //   BleManager.start({showAlert:false})
+  //   // turn on bluetooth if it is not on
+  //   BleManager.enableBluetooth().then(() => {
+  //     console.log('Bluetooth is turned on!');
+  //   });
+
+  //   if (Platform.OS === 'android' && Platform.Version >= 23) {
+  //     PermissionsAndroid.check(
+  //       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  //     ).then(result => {
+  //       if (result) {
+  //         console.log('Permission is OK');
+  //       } else {
+  //         PermissionsAndroid.request(
+  //           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  //         ).then(result => {
+  //           if (result) {
+  //             console.log('User accept');
+  //           } else {
+  //             console.log('User refuse');
+  //           }
+  //         });
+  //       }
+  //     });
+  //   }
+  // }, []);
   return (
     <View style={styles.container}>
       <Image source={smartwatch} style={styles.smartwatchIcon} />

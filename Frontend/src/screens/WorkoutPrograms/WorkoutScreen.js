@@ -20,7 +20,6 @@ import { default_ip_address } from "../../constant/constant";
     const route = useRoute();
   //   console.log(route.params);
     const navigation = useNavigation();
-    console.warn("api_call is:",route.params.api_call)
     const {
       completed,
       setCompleted,

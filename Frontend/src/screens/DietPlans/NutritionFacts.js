@@ -73,17 +73,18 @@ const NutritionFacts = ({ route }) => {
         </View>
         <View style={styles.nutritionFactContainer}>
           <Text style={styles.heading}>Nutrition Facts</Text>
-          <View style={styles.servingSizeCaloriesContainer}>
-            <View style={styles.nutritionFactContainerViews}>
-              <Text style={styles.subHeading}>Serving Size</Text>
-              <Text style={styles.subHeading}>100 Gram</Text>
-            </View>
-            <View style={styles.nutritionFactContainerViews}>
-              <Text style={styles.subHeading}>Calories</Text>
-              <Text style={styles.subHeading}>{result.calories.toFixed(2)}</Text>
-            </View>
-          </View>
+
           <View style={styles.nutrientsContainer}>
+            <View style={styles.servingSizeCaloriesContainer}>
+              <View style={styles.nutritionFactContainerViews}>
+                <Text style={styles.subHeading}>Serving Size</Text>
+                <Text style={styles.subHeading}>100 Gram</Text>
+              </View>
+              <View style={styles.nutritionFactContainerViews}>
+                <Text style={styles.subHeading}>Calories</Text>
+                <Text style={styles.subHeading}>{result.calories.toFixed(2)}</Text>
+              </View>
+            </View>
             <View style={styles.nutritionFactContainerViews}>
               <Text style={styles.subHeading}>Total Fat</Text>
               <Text style={styles.subHeading}>{fat}g</Text>
@@ -226,14 +227,12 @@ const styles = StyleSheet.create({
   nutritionClaimsContainer: {
     marginBottom: 16
   },
-  nutritionFactContainer: {
 
-    padding: 20,
-  },
   nutrientsContainer: {
     borderWidth: 1,
     borderRadius: 16,
     borderColor: '#fff',
+    padding: 10,
   },
   nutritionFactContainerViews: {
     flexDirection: 'row',

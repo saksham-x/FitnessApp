@@ -5,10 +5,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useNavigation } from '@react-navigation/native'
 import { default_ip_address } from '../../constant/constant'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+// import { ProgressBarAndroid } from 'react-native';
 const WorkoutPlan = () => {
   const navigation = useNavigation()
-  const [completedDays, setCompletedDays] = useState(0);
+  const [completedDays, setCompletedDays] = useState(1);
   const [currentWeek, setCurrentWeek] = useState(1);
   const [currentDay, setCurrentDay] = useState(1);
   const [progressPercentage, setProgressPercentage] = useState(0);
@@ -28,9 +28,10 @@ const WorkoutPlan = () => {
 
     let result = await fetch(`${default_ip_address}/get_completed_workout_days?id=${parsedData._id}`, {
       method: "get",
-      headers:{"Content-Type":"application/json"},
+      headers: { "Content-Type": "application/json" },
     })
     result = await result.json()
+    // console.warn(result)
     if (result.success === true) {
       setCompletedDays(result.workout_length)
     }
@@ -42,12 +43,12 @@ const WorkoutPlan = () => {
 
   useEffect(() => {
     getCompletedWorkoutLength()
-    setDayCountdown(28-(completedDays-1))
-    setProgressPercentage((completedDays - 1) *100/28)
-  }, [])
+    setDayCountdown(28 - (completedDays - 1))
+    setProgressPercentage((completedDays - 1) * 100 / 28)
+  }, [completedDays])
 
   const handleDayPress = async (week, day) => {
-    
+
     let days = (week - 1) * 7 + day
     if (completedDays >= days) {
       let result = await fetch(`${default_ip_address}/get_all_workouts?id=${userid}&day=${days}`, {
@@ -56,21 +57,21 @@ const WorkoutPlan = () => {
       result = await result.json()
       if (result.success === true) {
         console.log(result.workouts)
-        let api_call=false
-        if(completedDays===days){
-          api_call=true
+        let api_call = false
+        if (completedDays === days) {
+          api_call = true
         }
         navigation.navigate("WorkOutScreen", {
-          image:"https://cdn-images.cure.fit/www-curefit-com/image/upload/c_fill,w_842,ar_1.2,q_auto:eco,dpr_2,f_auto,fl_progressive/image/test/sku-card-widget/gold2.png",
-          exercises: result.workouts[days-1].workout,
-          intensity:result.workouts[days-1].intensity,
-          api_call:api_call
+          image: "https://cdn-images.cure.fit/www-curefit-com/image/upload/c_fill,w_842,ar_1.2,q_auto:eco,dpr_2,f_auto,fl_progressive/image/test/sku-card-widget/gold2.png",
+          exercises: result.workouts[days - 1].workout,
+          intensity: result.workouts[days - 1].intensity,
+          api_call: api_call
         })
       }
       else {
       }
     }
-    else{
+    else {
       Alert.alert('Incomplete Workout', 'Complete previous days\' workout first.');
     }
     // if (!(week == currentWeek && day == currentDay)) {
@@ -138,7 +139,7 @@ const WorkoutPlan = () => {
             <Text style={styles.dayText}>{day}</Text>
           </TouchableOpacity>
           <Entypo name='chevron-right' size={20} color={'white'} style={{ paddingHorizontal: 5 }} />
-          {day === 7 && <MaterialCommunityIcons name='trophy' size={40} color={(week < (completedDays/7)) ? '#e1c564' : '#d3d3d3'} style={{ paddingHorizontal: 5 }} onPress={areAllTrophiesGold} />}
+          {day === 7 && <MaterialCommunityIcons name='trophy' size={40} color={(week < (completedDays / 7)) ? '#e1c564' : '#d3d3d3'} style={{ paddingHorizontal: 5 }} onPress={areAllTrophiesGold} />}
         </View>
       );
     }
@@ -149,7 +150,7 @@ const WorkoutPlan = () => {
   const renderWeeks = () => {
     const weeks = [];
     for (let week = 1; week <= 4; week++) {
-      const weekStyle = week === (Math.floor(completedDays / 7)+1) ? styles.currentWeek : null;
+      const weekStyle = week === (Math.floor(completedDays / 7) + 1) ? styles.currentWeek : null;
       // console.log('week',week)
       weeks.push(
         <View key={week} style={[styles.weekContainer, weekStyle]}>

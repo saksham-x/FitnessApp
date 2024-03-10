@@ -65,7 +65,7 @@ const healthLabelsItems = [
 const InputParameters = () => {
 
   const navigation = useNavigation()
-
+  const [loaded, setLoaded] = useState(false);
   const [age, setAge] = useState('');
   const [gender, setGender] = useState();
   const [height, setHeight] = useState('')
@@ -105,6 +105,9 @@ const InputParameters = () => {
             // Check if the parsed data has the expected structure or properties
             // navigation.navigate('WorkoutPrograms');
             navigation.navigate('HomeScreen')
+          }
+          else{
+            setLoaded(true)
           }
         } catch (error) {
           console.error('Error parsing data or navigating:', error);
@@ -313,8 +316,9 @@ const InputParameters = () => {
   }
 
   return (
+    
     <View style={styles.container}>
-      {loading ? <Text style={{ color: 'white', fontSize: 16 }}>Generating 30 days workout plan...</Text> : (
+      {loaded && loading ? <Text style={{ color: 'white', fontSize: 16 }}>Generating 28 days workout plan...</Text> :loaded===true?(
         <>
           <Text style={styles.title}>Please Enter the following</Text>
 
@@ -481,7 +485,7 @@ const InputParameters = () => {
             style={styles.fullWidthInput}
           />
           <CustomButton text="Submit" type="PRIMARY" onPress={handleUserInput} />
-        </>)}
+        </>):''}
     </View>
   )
 }

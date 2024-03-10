@@ -18,6 +18,7 @@ const SmartwatchStat = () => {
 
   const handleConnect = () => {
     navigation.navigate('ScanDevices')
+    // navigation.navigate('SmartWatchDetails')
   }
   // useEffect(() => {
   //   console.warn("running effects")

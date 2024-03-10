@@ -1,43 +1,43 @@
 // EmailInput.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet,Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
 import CustomButton from '../../components/CustomButtons/CustomButton';
 import CustomizedInput from '../../components/CustomizedInput/CustomizedInput';
 import { useNavigation } from '@react-navigation/native';
 import { default_ip_address } from '../../constant/constant';
 
 const EmailInput = ({ }) => {
-  const [phone, setPhone] = useState('');
-  
+  const [email, setEmail] = useState('');
+
   const navigation = useNavigation()
 
-  const onContinue = async() => {
-    const phonenumber='+977'+phone;
+  const onContinue = async () => {
+
     let result = await fetch(`${default_ip_address}/forgetpassword`, {
       method: "post",
-      body: JSON.stringify({phonenumber}),
+      body: JSON.stringify({ email }),
       headers: { "Content-Type": "application/json" },
     });
     result = await result.json();
-    if(result.success===true){
-    navigation.navigate('OTPConfirmation2',{userid:result.result._id})
+    if (result.success === true) {
+      navigation.navigate('OTPConfirmation2', { userid: result.result._id })
     }
-    else if(result.success===false){
-      Alert.alert('OTP Error',result.error)
+    else if (result.success === false) {
+      Alert.alert('OTP Error', result.error)
     }
   };
 
 
   return (
     <View style={styles.root}>
-      <Text style={styles.title}>Enter Your Phone Number</Text>
-      <Text style={styles.subtitle}>Please enter your phone number to proceed with the password reset.</Text>
+      <Text style={styles.title}>Enter Your Email</Text>
+      <Text style={styles.subtitle}>Please enter your email to proceed with the password reset.</Text>
       <CustomizedInput
-        value={phone}
-        setValue={setPhone}
-        placeholder="Phone Number"
+        value={email}
+        setValue={setEmail}
+        placeholder="Email"
         style={styles.input}
-        keyboardType="numeric"
+        keyboardType="email-address"
       />
       <CustomButton text="Continue" onPress={onContinue} />
     </View>

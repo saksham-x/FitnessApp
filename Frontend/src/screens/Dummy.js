@@ -1,4 +1,4 @@
-import React,{ useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, Text } from 'react-native';
 import RecipesCard from './DietPlans/RecipesCard';
 import axios from "axios";
@@ -6,7 +6,7 @@ import { default_ip_address } from '../constant/constant';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DummyComponent = () => {
-  const [calorie,setCalorie] = useState();
+  const [calorie, setCalorie] = useState();
   // const [breakfastCalori, setbreakfastCalori]=useState();
   // const [lunchCalori, setlunchCalori] = useState();
   // const [snacksCalori, setsnacksCalori] = useState();
@@ -25,7 +25,7 @@ const DummyComponent = () => {
   const [randomsnacks, setRandomSnacks] = useState({});
   const [randomDinner, setRandomDinner] = useState({});
   const [userID, setUserID] = useState()
-const[healthLabel,setHealthLabel]=useState([])
+  const [healthLabel, setHealthLabel] = useState([])
   const getMyObject = async () => {
     try {
       return await AsyncStorage.getItem('user')
@@ -38,18 +38,19 @@ const[healthLabel,setHealthLabel]=useState([])
     const checkLocalStorage = async () => {
       try {
         const data = await getMyObject()
-        if(data) {
+        if (data) {
           const parsedData = await JSON.parse(data)
-          if(parsedData) {
+          if (parsedData) {
             setUserID(parsedData._id)
             let user_input = await AsyncStorage.getItem("userInputs")
-            user_input =await JSON.parse(user_input)
+            user_input = await JSON.parse(user_input)
+            console.log(" sharan ", user_input);
             if (user_input.userObject) {
               console.log(user_input.userObject.Calories)
-             setCalorie(user_input.userObject.Calories)
-             let labels=user_input.userObject.Calories.map((item)=>{
-              return item.label
-             })
+              setCalorie(user_input.userObject.Calories)
+              let labels = user_input.userObject.Calories.map((item) => {
+                return item.label
+              })
               setHealthLabel(labels)
               // setbreakfastCalori(user_input.userObject.Calories*0.23)
               // setlunchCalori(user_input.userObject.Calories*0.33)
@@ -63,10 +64,10 @@ const[healthLabel,setHealthLabel]=useState([])
                 return item.label
               })
               setHealthLabel(labels)
-            //   setbreakfastCalori(user_input.calories*0.23)
-            //   setlunchCalori(user_input.calories*0.33)
-            //   setsnacksCalori(user_input.calories*0.17)
-            // setdinnerCalori(user_input.calories*0.27)
+              //   setbreakfastCalori(user_input.calories*0.23)
+              //   setlunchCalori(user_input.calories*0.33)
+              //   setsnacksCalori(user_input.calories*0.17)
+              // setdinnerCalori(user_input.calories*0.27)
             }
           }
         }
@@ -75,36 +76,36 @@ const[healthLabel,setHealthLabel]=useState([])
       }
     }
     checkLocalStorage()
-  },[])
+  }, [])
 
   useEffect(() => {
-    if(userID) {
-    console.log('inside seccond effect', userID)
-    console.log(calorie)
+    if (userID) {
+      console.log('inside seccond effect', userID)
+      console.log(calorie)
       fetchData(userID)
     }
-  },[userID,calorie,healthLabel])
+  }, [userID, calorie, healthLabel])
 
 
-  async function sendDiet(data1,data2,data3,data4) {
-    console.log('id:',userID)
-    axios.post(`${default_ip_address}/add_daily_diets?id=${userID}`,{
-        'breakfast':data1,
-        'lunch':data2,
-        'snacks':data3,
-        'dinner':data4
-    }).then((res)=>{
-        console.log('senddiet',res)
-    }).catch((err)=>{
-        console.log(err)
+  async function sendDiet(data1, data2, data3, data4) {
+    console.log('id:', userID)
+    axios.post(`${default_ip_address}/add_daily_diets?id=${userID}`, {
+      'breakfast': data1,
+      'lunch': data2,
+      'snacks': data3,
+      'dinner': data4
+    }).then((res) => {
+      console.log('senddiet', res)
+    }).catch((err) => {
+      console.log(err)
     })
   }
 
   async function newdiets() {
-    let demo1={}
-    let demo2={}
-    let demo3={}
-    let demo4={}
+    let demo1 = {}
+    let demo2 = {}
+    let demo3 = {}
+    let demo4 = {}
     let res1 = await fetch(`${default_ip_address}/edamam?calories=${breakfastCalori}&mealType=breakfast&healthLabels=${healthLabel}`,
       {
         method: "get",
@@ -113,7 +114,7 @@ const[healthLabel,setHealthLabel]=useState([])
     res1 = await res1.json();
     if (res1.success === true) {
       setBreakfast(res1.result);
-      demo1=res1.result[Math.floor(Math.random() * res1.result.length)]
+      demo1 = res1.result[Math.floor(Math.random() * res1.result.length)]
       setRandomBreakfast(demo1);
     }
     let res2 = await fetch(`${default_ip_address}/edamam?calories=${lunchCalori}&mealType=lunch/dinner&healthLabels=${healthLabel}`,
@@ -124,7 +125,7 @@ const[healthLabel,setHealthLabel]=useState([])
     res2 = await res2.json();
     if (res2.success === true) {
       setLunch(res2.result);
-      demo2=res2.result[Math.floor(Math.random() * res2.result.length)]
+      demo2 = res2.result[Math.floor(Math.random() * res2.result.length)]
       setRandomLunch(demo2);
     }
     let res3 = await fetch(`${default_ip_address}/edamam?calories=${snacksCalori}&mealType=snack,teatime&healthLabels=${healthLabel}`,
@@ -134,7 +135,7 @@ const[healthLabel,setHealthLabel]=useState([])
     );
     res3 = await res3.json();
     setSnacks(res3.result);
-    demo3=res3.result[Math.floor(Math.random() * res3.result.length)]
+    demo3 = res3.result[Math.floor(Math.random() * res3.result.length)]
     setRandomSnacks(demo3);
     let res4 = await fetch(`${default_ip_address}/edamam?calories=${dinnerCalori}&mealType=lunch/dinner&healthLabels=${healthLabel}`,
       {
@@ -143,15 +144,15 @@ const[healthLabel,setHealthLabel]=useState([])
     );
     res4 = await res4.json();
     setDinner(res4.result);
-    demo4=res4.result[Math.floor(Math.random() * res4.result.length)]
+    demo4 = res4.result[Math.floor(Math.random() * res4.result.length)]
     setRandomDinner(demo4);
-    return [demo1,demo2,demo3,demo4];
+    return [demo1, demo2, demo3, demo4];
   }
 
   async function fetchData() {
-    console.log("id here is",userID)
+    console.log("id here is", userID)
     console.log("calorie here is", calorie)
-    if(calorie && userID){
+    if (calorie && userID) {
       let res = await fetch(`${default_ip_address}/get_todays_diet?id=${userID}`,
         {
           method: "get",
@@ -166,8 +167,8 @@ const[healthLabel,setHealthLabel]=useState([])
         setRandomSnacks(res.result[0].snacks);
         setRandomDinner(res.result[0].dinner);
       } else {
-         let [got1,got2,got3,got4]=await newdiets()
-         await sendDiet(got1,got2,got3,got4)
+        let [got1, got2, got3, got4] = await newdiets()
+        await sendDiet(got1, got2, got3, got4)
       }
     }
   }

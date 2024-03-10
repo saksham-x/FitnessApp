@@ -127,9 +127,9 @@ const WorkoutPlan = () => {
       const dayCompletedStyle = completedDays > ((week - 1) * 7 + day) ? styles.currentDayCompleted : null
       // console.log('day',day)
       days.push(
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View key={day} style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity
-            key={day}
+            // key={day}
             style={[styles.dayContainer, dayStyle, dayCompletedStyle]}
             onPress={() => handleDayPress(week, day)}
             activeOpacity={0.8}

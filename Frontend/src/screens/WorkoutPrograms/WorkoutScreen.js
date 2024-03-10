@@ -45,7 +45,7 @@ import { default_ip_address } from "../../constant/constant";
           <Icon
             onPress={() => navigation.goBack()}
             style={{ position: "absolute", top: 20, left: 20 }}
-            name="arow-back"
+            name="arrow-back"
             size={28}
             color="white"
           />

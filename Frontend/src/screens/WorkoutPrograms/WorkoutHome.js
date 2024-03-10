@@ -5,6 +5,7 @@ import { FitnessItems } from "../../components/Context/Context";
 import { useNavigation } from "@react-navigation/native";
 import { default_ip_address } from '../../constant/constant';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from "@react-navigation/native";
 
 const WorkoutHome = () => {
   const navigation = useNavigation()
@@ -19,8 +20,9 @@ const WorkoutHome = () => {
   const handle30daysworkout = () => {
     navigation.navigate('WorkoutPlan')
   }
-
-  useEffect(() => {
+  
+useFocusEffect(
+  React.useCallback(() => {
     const checktodaysprogress = async () => {
       let userData = await AsyncStorage.getItem('user')
       userData = await JSON.parse(userData)
@@ -32,13 +34,34 @@ const WorkoutHome = () => {
         setMinutes(min.toFixed(2))
         setCalories(cal.toFixed(2))
       }
-      else{
+      else {
         setMinutes(0)
         setCalories(0)
       }
     }
     checktodaysprogress()
   }, [])
+)
+  // useEffect(() => {
+ 
+  //   const checktodaysprogress = async () => {
+  //     let userData = await AsyncStorage.getItem('user')
+  //     userData = await JSON.parse(userData)
+  //     let data = await fetch(`${default_ip_address}/getTodaysCalorieAndTime?id=${userData._id}`, { method: 'get' })
+  //     data = await data.json();
+  //     if (data.success === true) {
+  //       const min = data.result[0].workout_interval
+  //       const cal = data.result[0].calorieBurnt
+  //       setMinutes(min.toFixed(2))
+  //       setCalories(cal.toFixed(2))
+  //     }
+  //     else{
+  //       setMinutes(0)
+  //       setCalories(0)
+  //     }
+  //   }
+  //   checktodaysprogress()
+  // }, [])
 
   return (
     <ScrollView style={{ marginTop: 40 }}>

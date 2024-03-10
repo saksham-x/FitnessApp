@@ -7,6 +7,8 @@ import AddItem from '../../components/addItem/AddItem'
 import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { default_ip_address } from '../../constant/constant'
+import { useFocusEffect } from "@react-navigation/native";
+
 const activityLevelItems = [
   { label: 'Little or no exercise', value: 1 },
   { label: 'Light exercise/sports 1-3 days/week', value: 2 },
@@ -86,28 +88,53 @@ const InputParameters = () => {
       throw new Error(error)
     }
   }
-  useEffect(() => {
-    const checkAndNavigate = async () => {
-      try {
-        const userdetails = await getMyObject();
-        const parsedData = JSON.parse(userdetails);
-        console.log("parsed data", parsedData)
-        let data = await fetch(`${default_ip_address}/getInformation?id=${parsedData._id}`,
-          { method: 'post' })
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const checkAndNavigate = async () => {
+        try {
+          const userdetails = await getMyObject();
+          const parsedData = JSON.parse(userdetails);
+          console.log("parsed data", parsedData)
+          let data = await fetch(`${default_ip_address}/getInformation?id=${parsedData._id}`,
+            { method: 'post' })
           data = await data.json()
           if (data.success === true) {
             console.log(data)
-          await AsyncStorage.setItem('userInputs', JSON.stringify(data.data));
-          // Check if the parsed data has the expected structure or properties
-          // navigation.navigate('WorkoutPrograms');
-          navigation.navigate('HomeScreen')
+            await AsyncStorage.setItem('userInputs', JSON.stringify(data.data));
+            // Check if the parsed data has the expected structure or properties
+            // navigation.navigate('WorkoutPrograms');
+            navigation.navigate('HomeScreen')
+          }
+        } catch (error) {
+          console.error('Error parsing data or navigating:', error);
         }
-      } catch (error) {
-        console.error('Error parsing data or navigating:', error);
-      }
-    };
-    checkAndNavigate();
-  }, [])
+      };
+      checkAndNavigate();
+    },[])
+  )
+  // useEffect(() => {
+  //   const checkAndNavigate = async () => {
+  //     try {
+  //       const userdetails = await getMyObject();
+  //       const parsedData = JSON.parse(userdetails);
+  //       console.log("parsed data", parsedData)
+  //       let data = await fetch(`${default_ip_address}/getInformation?id=${parsedData._id}`,
+  //         { method: 'post' })
+  //         data = await data.json()
+  //         if (data.success === true) {
+  //           console.log(data)
+  //         await AsyncStorage.setItem('userInputs', JSON.stringify(data.data));
+  //         // Check if the parsed data has the expected structure or properties
+  //         // navigation.navigate('WorkoutPrograms');
+  //         navigation.navigate('HomeScreen')
+  //       }
+  //     } catch (error) {
+  //       console.error('Error parsing data or navigating:', error);
+  //     }
+  //   };
+  //   checkAndNavigate();
+  // }, [])
 
   useEffect(() => {
     calculateBmi()
@@ -227,7 +254,7 @@ const InputParameters = () => {
           "Goals": goals,
           "Injury": injury,
           "Current_fitness_level": fitnessLevel,
-          "Calories": calculatedCalorie,
+          "Calories": calories,
           'healthLabels': selectedHealthLabel
         }
         let result = await fetch(`${default_ip_address}/userInput`, {
@@ -318,7 +345,7 @@ const InputParameters = () => {
                 placeholder="Age"
                 value={age}
                 setValue={(e) => setAge(e)}
-                keyboardType='Numeric'
+                keyboardType='numeric'
               />
             </View>
           </View>
@@ -336,7 +363,7 @@ const InputParameters = () => {
                 placeholder="Height(m)"
                 value={height}
                 setValue={(e) => handleHeightChange(e)}
-                keyboardType='Numeric'
+                keyboardType='numeric'
               />
             </View>
             <View style={styles.halfWidthInput}>
@@ -351,7 +378,7 @@ const InputParameters = () => {
                 placeholder="Weight(kg)"
                 value={weight}
                 setValue={(e) => handleWeightChange(e)}
-                keyboardType='Numeric'
+                keyboardType='numeric'
               />
             </View>
           </View>
@@ -361,7 +388,7 @@ const InputParameters = () => {
               value={bmi}
               placeholder="BMI"
               style={styles.halfWidthInput}
-              keyboardType='Numeric'
+              keyboardType='numeric'
               type='userparameters'
             />
             <CustomizedInput

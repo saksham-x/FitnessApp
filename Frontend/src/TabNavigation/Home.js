@@ -56,7 +56,7 @@ useEffect(() => {
             title={titles.diet}
             type='DIET'
             // screenName='MaintainCalorie'
-            screenName='dummy'
+            screenName='Diet'
 
           />
           <Banner

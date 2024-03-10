@@ -16,13 +16,13 @@ const RecipesCard = ({title, recipe}) => {
                     <Text style={styles.heading}>{title}</Text>
                     {/* <Entypo name='shuffle' size={20} /> */}
             </View>
-            {recipe.image && (
-                <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
+            {recipe.image_url && (
+                <Image source={{ uri: recipe.image_url }} style={styles.recipeImage} />
             )}
             <Text style={styles.recipeLabel}>{recipe.label}</Text>
-            <Text>Source: {recipe.source}</Text>
-            <Text>Yield: {recipe.yield}</Text>
-            <Text>Calories: {recipe.calories}</Text>
+            {/* <Text>Source: {recipe.source}</Text> */}
+            {/* <Text>Yield: {recipe.yield}</Text> */}
+       <Text>Calories: {recipe.calories ? recipe.calories.toFixed(2):''}</Text>
             <Text>Cuisine: {recipe.cuisineType}</Text>
             <Text>Meal Type: {recipe.mealType}</Text>
             {/* <Text style={styles.ingredientsTitle}>Ingredients:</Text>

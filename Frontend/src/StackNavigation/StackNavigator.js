@@ -65,7 +65,7 @@ const StackNavigator = () => {
         <Stack.Screen name='WorkoutFeedback' component={WorkoutFeedback}/>
 
 
-        <Stack.Screen name='dummy' component={DummyComponent} />
+        <Stack.Screen name='Diet' component={DummyComponent} />
         <Stack.Screen name='RecipeCard' component={RecipesCard} />
         <Stack.Screen name='NutritionFacts' component={NutritionFacts} />
         <Stack.Screen name='CongratulationScreen' component={CongratulationScreen} />

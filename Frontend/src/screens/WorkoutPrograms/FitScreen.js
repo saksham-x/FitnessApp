@@ -35,7 +35,9 @@ const[userId,setUserId]=useState()
       }
       else if (current.time) {
         setShowDone(false)
-        setTimer(current.time)
+        // Time sethere
+        setTimer(3)
+        // setTimer(current.time)
       }
 return()=>{}
     }, [index])
